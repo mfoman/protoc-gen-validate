@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package io.envoyproxy.pgv.grpc;
+
+// option csharp_multiple_files = true;
+option csharp_namespace = "Envoy.Pgv.Grpc";
+// option csharp_package = "io.envoyproxy.pgv.grpc.asubpackage";
+// option csharp_ = "Ponycopter";
+
+import "validate/validate.proto";
+
+service Greeter {
+    rpc SayHello (HelloJKRequest) returns (HelloResponse) {}
+}
+
+message HelloJKRequest {
+    string name = 1 [(validate.rules).string.const = "World"];
+}
+
+message HelloResponse {
+    string message = 1;
+}

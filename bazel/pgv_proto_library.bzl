@@ -1,6 +1,6 @@
 load("@io_bazel_rules_go//proto:def.bzl", "go_proto_library")
 load("@rules_cc//cc:defs.bzl", "cc_library")
-load(":protobuf.bzl", "cc_proto_gen_validate", "java_proto_gen_validate")
+load(":protobuf.bzl", "cc_proto_gen_validate", "java_proto_gen_validate", "csharp_proto_gen_validate")
 
 _DEFAULT_GO_PROTOC = ["@io_bazel_rules_go//proto:go_proto"]
 
@@ -58,3 +58,4 @@ def pgv_cc_proto_library(
     )
 
 pgv_java_proto_library = java_proto_gen_validate
+pgv_csharp_proto_library = csharp_proto_gen_validate

@@ -1,4 +1,5 @@
 load("@rules_java//java:defs.bzl", "java_proto_library")
+load("@rules_dotnet//dotnet:defs.bzl", "csharp_proto_library")
 load("@rules_proto//proto:defs.bzl", "proto_library")
 load("@com_google_protobuf//:protobuf.bzl", "py_proto_library")
 load(
@@ -6,6 +7,7 @@ load(
     "pgv_cc_proto_library",
     "pgv_go_proto_library",
     "pgv_java_proto_library",
+    "pgv_csharp_proto_library",
 )
 
 # gazelle:go_generate_proto false
@@ -79,6 +81,23 @@ pgv_java_proto_library(
         ":cases_java_proto",
         "//tests/harness/cases/other_package:java",
         "//tests/harness/cases/yet_another_package:java",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [":cases_proto"],
+)
+
+csharp_proto_library(
+    name = "cases_csharp_proto",
+    visibility = ["//visibility:public"],
+    deps = [":cases_proto"],
+)
+
+pgv_csharp_proto_library(
+    name = "csharp",
+    csharp_deps = [
+        ":cases_csharp_proto",
+        "//tests/harness/cases/other_package:csharp",
+        "//tests/harness/cases/yet_another_package:csharp",
     ],
     visibility = ["//visibility:public"],
     deps = [":cases_proto"],

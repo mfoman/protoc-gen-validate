@@ -20,6 +20,26 @@ ENV INSTALL_DEPS \
   openjdk-8-jdk \
   gnupg 
 
+# Dotnet
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends \
+  curl \
+  ca-certificates \
+  \
+  # .NET dependencies
+  libc6 \
+  libgcc1 \
+  libgssapi-krb5-2 \
+  libicu66 \
+  libssl1.1 \
+  libstdc++6 \
+  zlib1g \
+  && rm -rf /var/lib/apt/lists/*
+
+RUN curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin -Channel 7.0 -Runtime dotnet -InstallDir /usr/share/dotnet \
+  && ln -s /usr/share/dotnet/dotnet /usr/bin/dotnet
+
+# Normal updates
 RUN apt update \
   && apt install -y -q --no-install-recommends ${INSTALL_DEPS} \
   && apt clean

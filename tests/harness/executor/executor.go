@@ -21,13 +21,14 @@ func main() {
 	goFlag := flag.Bool("go", false, "Run go test harness")
 	ccFlag := flag.Bool("cc", false, "Run c++ test harness")
 	javaFlag := flag.Bool("java", false, "Run java test harness")
+	csharpFlag := flag.Bool("csharp", false, "Run csharp test harness")
 	pythonFlag := flag.Bool("python", false, "Run python test harness")
 	externalHarnessFlag := flag.String("external_harness", "", "Path to a binary to be executed as an external test harness")
 	flag.Parse()
 
 	test_cases := shardTestCases(TestCases)
 	start := time.Now()
-	harnesses := Harnesses(*goFlag, *ccFlag, *javaFlag, *pythonFlag, *externalHarnessFlag)
+	harnesses := Harnesses(*goFlag, *ccFlag, *javaFlag, *csharpFlag, *pythonFlag, *externalHarnessFlag)
 	successes, failures, skips := run(*parallelism, harnesses, test_cases)
 
 	log.Printf("Successes: %d | Failures: %d | Skips: %d (%v)",

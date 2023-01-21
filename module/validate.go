@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/envoyproxy/protoc-gen-validate/templates"
+	"github.com/envoyproxy/protoc-gen-validate/templates/csharp"
 	"github.com/envoyproxy/protoc-gen-validate/templates/java"
 	pgs "github.com/lyft/protoc-gen-star"
 	pgsgo "github.com/lyft/protoc-gen-star/lang/go"
@@ -19,7 +20,7 @@ const (
 type Module struct {
 	*pgs.ModuleBase
 	ctx pgsgo.Context
-	// lang contains the selected language (one of 'cc', 'go', 'java').
+	// lang contains the selected language (one of 'cc', 'go', 'java', 'csharp').
 	// It is initialized in ValidatorForLanguage.
 	// If unset, it will be parsed as the 'lang' parameter.
 	lang string
@@ -70,15 +71,38 @@ func (m *Module) Execute(targets map[string]pgs.File, pkgs map[string]pgs.Packag
 			if out != nil {
 				outPath := strings.TrimLeft(strings.ReplaceAll(filepath.ToSlash(out.String()), module, ""), "/")
 
-				if opts := f.Descriptor().GetOptions(); opts != nil && opts.GetJavaMultipleFiles() && lang == "java" {
-					// TODO: Only Java supports multiple file generation. If more languages add multiple file generation
-					// support, the implementation should be made more inderect.
-					for _, msg := range f.Messages() {
-						m.AddGeneratorTemplateFile(java.JavaMultiFilePath(f, msg).String(), tpl, msg)
+				if opts := f.Descriptor().GetOptions(); opts != nil {
+					// java
+					if lang == "java" && opts.GetJavaMultipleFiles() {
+						for _, msg := range f.Messages() {
+							m.AddGeneratorTemplateFile(java.JavaMultiFilePath(f, msg).String(), tpl, msg)
+						}
+					} else {
+						m.AddGeneratorTemplateFile(outPath, tpl, f)
+					}
+
+					// csharp
+					if lang == "csharp" && opts.CsharpNamespace != nil {
+						for _, msg := range f.Messages() {
+							m.AddGeneratorTemplateFile(csharp.CsharpMultiFilePath(f, msg).String(), tpl, msg)
+						}
+					} else {
+						m.AddGeneratorTemplateFile(outPath, tpl, f)
 					}
 				} else {
 					m.AddGeneratorTemplateFile(outPath, tpl, f)
 				}
+
+
+				// if opts := f.Descriptor().GetOptions(); opts != nil && opts.GetJavaMultipleFiles() && lang == "java" {
+				// 	// TODO: Only Java supports multiple file generation. If more languages add multiple file generation
+				// 	// support, the implementation should be made more inderect.
+				// 	for _, msg := range f.Messages() {
+				// 		m.AddGeneratorTemplateFile(java.JavaMultiFilePath(f, msg).String(), tpl, msg)
+				// 	}
+				// } else {
+				// 	m.AddGeneratorTemplateFile(outPath, tpl, f)
+				// }
 			}
 		}
 

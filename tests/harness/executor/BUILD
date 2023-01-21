@@ -38,6 +38,7 @@ go_binary(
         "//conditions:default": [
             "//tests/harness/go/main:go-harness-bin",
             "//tests/harness/java:java-harness",
+            "//tests/harness/csharp:csharp-harness",
             "//tests/harness/python:python-harness",
         ],
     }),
@@ -60,5 +61,5 @@ go_binary(
         shard_count = 5,
         deps = ["@bazel_tools//tools/bash/runfiles"],
     )
-    for lang in ("cc", "go", "java", "python")
+    for lang in ("cc", "go", "java", "python", "csharp")
 ]

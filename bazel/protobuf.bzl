@@ -1,5 +1,5 @@
 load("@bazel_skylib//rules:common_settings.bzl", "BuildSettingInfo")
-load("@bazel_tools//tools/jdk:toolchain_utils.bzl", "find_java_runtime_toolchain", "find_java_toolchain")
+load("@bazel_tools//tools/jdk:toolchain_utils.bzl", "find_java_runtime_toolchain", "find_java_toolchain", "find_csharp_runtime_toolchain", "find_csharp_toolchain")
 load("@rules_proto//proto:defs.bzl", "ProtoInfo")
 
 # Borrowed from https://github.com/grpc/grpc-java/blob/v1.28.0/java_grpc_library.bzl#L59
@@ -238,4 +238,110 @@ java_proto_gen_validate = rule(
         "srcjar": "lib%{name}-src.jar",
     },
     implementation = _java_proto_gen_validate_impl,
+)
+
+# /* --------------------------------- CSHARP --------------------------------- */
+
+def _csharp_proto_gen_validate_aspect_impl(target, ctx):
+    proto_info = target[ProtoInfo]
+    includes = proto_info.transitive_imports
+    srcs = proto_info.direct_sources
+    options = ",".join(["lang=csharp"])
+    srcjar = ctx.actions.declare_file("%s-validate-gensrc.jar" % ctx.label.name)
+
+    args = ctx.actions.args()
+    args.add(ctx.executable._plugin.path, format = "--plugin=protoc-gen-validate=%s")
+    args.add("--validate_out={0}:{1}".format(options, srcjar.path))
+    args.add_all(includes, map_each = _create_include_path)
+    args.add_all(srcs, map_each = _path_ignoring_repository)
+
+    ctx.actions.run(
+        inputs = depset(transitive = [proto_info.transitive_imports]),
+        outputs = [srcjar],
+        executable = ctx.executable._protoc,
+        arguments = [args],
+        tools = [ctx.executable._plugin],
+        progress_message = "Generating %s" % srcjar.path,
+    )
+
+    return [_ProtoValidateSourceInfo(
+        sources = depset(
+            [srcjar],
+            transitive = [dep[_ProtoValidateSourceInfo].sources for dep in ctx.rule.attr.deps],
+        ),
+    )]
+
+_csharp_proto_gen_validate_aspect = aspect(
+    _csharp_proto_gen_validate_aspect_impl,
+    provides = [_ProtoValidateSourceInfo],
+    attr_aspects = ["deps"],
+    attrs = {
+        "_protoc": attr.label(
+            cfg = "host",
+            default = Label("@com_google_protobuf//:protoc"),
+            executable = True,
+            allow_single_file = True,
+        ),
+        "_plugin": attr.label(
+            cfg = "host",
+            default = Label("@com_envoyproxy_protoc_gen_validate//:protoc-gen-validate"),
+            allow_files = True,
+            executable = True,
+        ),
+    },
+)
+
+def _csharp_proto_gen_validate_impl(ctx):
+    source_dlls = [source_dll for dep in ctx.attr.deps for source_dll in dep[_ProtoValidateSourceInfo].sources.to_list()]
+
+    deps = [csharp_common.make_non_strict(dep[csharpInfo]) for dep in ctx.attr.csharp_deps]
+    deps += [dep[csharpInfo] for dep in ctx.attr._validate_deps]
+
+    csharp_info = csharp_common.compile(
+        ctx,
+        source_dlls = source_dlls,
+        deps = deps,
+        output_source_dll = ctx.outputs.srcdll,
+        output = ctx.outputs.dll,
+        csharp_toolchain = find_csharp_toolchain(ctx, ctx.attr._csharp_toolchain),
+    )
+
+    return [csharp_info]
+
+"""Bazel rule to create a csharp protobuf validation library from proto sources files.
+
+Args:
+  deps: proto_library rules that contain the necessary .proto files
+  csharp_deps: the csharp_proto_library of the protos being compiled.
+"""
+csharp_proto_gen_validate = rule(
+    attrs = {
+        "deps": attr.label_list(
+            providers = [ProtoInfo],
+            aspects = [_csharp_proto_gen_validate_aspect],
+            mandatory = True,
+        ),
+        "csharp_deps": attr.label_list(
+            providers = [csharpInfo],
+            mandatory = True,
+        ),
+        "_validate_deps": attr.label_list(
+            default = [
+                Label("@com_envoyproxy_protoc_gen_validate//validate:validate_csharp"),
+                Label("@com_google_re2j//dll"),
+                Label("@com_google_protobuf//:protobuf_csharp"),
+                Label("@com_google_protobuf//:protobuf_csharp_util"),
+                Label("@com_envoyproxy_protoc_gen_validate//csharp/pgv-csharp-stub/src/main/csharp/io/envoyproxy/pgv"),
+                Label("@com_envoyproxy_protoc_gen_validate//csharp/pgv-csharp-validation/src/main/csharp/io/envoyproxy/pgv"),
+            ],
+        ),
+        "_csharp_toolchain": attr.label(default = Label("@bazel_tools//tools/dotnet:current_csharp_toolchain")),
+    },
+    fragments = ["csharp"],
+    provides = [csharpInfo],
+    outputs = {
+        "dll": "lib%{name}.dll",
+        "srcdll": "lib%{name}-src.dll",
+    },
+    implementation = _csharp_proto_gen_validate_impl,
 )

@@ -112,6 +112,7 @@ cd protoc-gen-validate && make build
     - `go`
     - `cc` for c++ (partially implemented)
     - `java`
+    - `csharp`
 - Note: Python works via runtime code generation. There's no compile-time
   generation. See the Python section for details.
 
@@ -245,6 +246,11 @@ index.validatorFor(message.getClass()).assertValid(message);
 clientStub = clientStub.withInterceptors(new ValidatingClientInterceptor(index));
 serverBuilder.addService(ServerInterceptors.intercept(svc, new ValidatingServerInterceptor(index)));
 ```
+
+#### CSharp
+
+Idk.
+
 
 #### Python
 

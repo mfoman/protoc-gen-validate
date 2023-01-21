@@ -131,6 +131,11 @@ tests/harness/java/java-harness:
 	# generates the Java-specific test harness
 	mvn -q -f java/pom.xml clean package -DskipTests
 
+# [TODO] needs to be updated to use the new C# harness
+tests/harness/csharp/csharp-harness:
+	# generates the Csharp-specific test harness
+	mvn -q -f csharp/pom.xml clean package -DskipTests
+
 .PHONY: prepare-python-release
 prepare-python-release:
 	cp validate/validate.proto python/

@@ -11,6 +11,9 @@ builds:
   - main: ./cmd/protoc-gen-validate-java
     id: "protoc-gen-validate-java"
     binary: "protoc-gen-validate-java"
+  - main: ./cmd/protoc-gen-validate-csharp
+    id: "protoc-gen-validate-csharp"
+    binary: "protoc-gen-validate-csharp"
 
 release:
   # If set to true, will not auto-publish the release.

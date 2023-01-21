@@ -16,7 +16,7 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-func Harnesses(goFlag, ccFlag, javaFlag, pythonFlag bool, externalHarnessFlag string) []Harness {
+func Harnesses(goFlag, ccFlag, javaFlag, csharpFlag, pythonFlag bool, externalHarnessFlag string) []Harness {
 	harnesses := make([]Harness, 0)
 	if goFlag {
 		harnesses = append(harnesses, InitHarness("tests/harness/go/main/go-harness", "go"))
@@ -26,6 +26,9 @@ func Harnesses(goFlag, ccFlag, javaFlag, pythonFlag bool, externalHarnessFlag st
 	}
 	if javaFlag {
 		harnesses = append(harnesses, InitHarness("tests/harness/java/java-harness", "java"))
+	}
+	if csharpFlag {
+		harnesses = append(harnesses, InitHarness("tests/harness/csharp/csharp-harness", "csharp"))
 	}
 	if pythonFlag {
 		harnesses = append(harnesses, InitHarness("tests/harness/python/python-harness", "python"))
