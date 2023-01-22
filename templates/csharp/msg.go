@@ -5,7 +5,7 @@ const msgTpl = `
 	/**
 	 * Validates {@code {{ simpleName . }}} protobuf objects.
 	 */
-	public static class {{ simpleName . }}Validator implements io.envoyproxy.pgv.ValidatorImpl<{{ qualifiedName . }}> {
+	public static class {{ simpleName . }}Validator : io.envoyproxy.pgv.ValidatorImpl<{{ qualifiedName . }}> {
 		{{- template "msgInner" . -}}
 	}
 {{- end -}}

@@ -217,3 +217,22 @@
         </plugins>
     </build>
 </project>
+
+<!-- 
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <Protobuf Include="*.proto" GrpcServices="None" />
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="Google.Protobuf" Version="3.17.3" />
+        <PackageReference Include="Grpc.Tools" Version="2.40.0" PrivateAssets="All" />
+        <PackageReference Include="Microsoft.Build.Traversal" Version="3.0.0" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.10.0" />
+        <PackageReference Include="NUnit" Version="3.13.2" />
+        <PackageReference Include="NUnit3TestAdapter" Version="4.0.0" />
+        <PackageReference Include="coverlet.collector" Version="3.0.3" />
+    </ItemGroup>
+</Project>
+
+ -->
